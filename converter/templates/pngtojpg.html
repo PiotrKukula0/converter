@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="static/styles.css">
+</head>
+
+<body>
+    <div class="conversion-container">
+        <h2 class="conversion-title">Convert PNG to JPG</h2>
+        <form>
+            <input type="file" id="image" accept=".png">
+            <br><br>
+            <button type="button" onclick="convertImage()">Convert to JPG</button>
+        </form>
+        <p id="error"></p>
+
+        <script>
+            function convertImage() {
+                // Get selected image file
+                var image = document.getElementById('image').files[0];
+
+                // Check if image is selected and is in PNG format and less than 5MB
+                if (!image) {
+                    document.getElementById('error').innerHTML = 'Please select an image.';
+                    return;
+                }
+                if (image.type !== 'image/png') {
+                    document.getElementById('error').innerHTML = 'Invalid image type. Please select a PNG image.';
+                    return;
+                }
+                if (image.size > 5000000) {
+                    document.getElementById('error').innerHTML = 'Image size too large. Please select an image less than 5MB.';
+                    return;
+                }
+
+                // Create FormData object
+                var data = new FormData();
+                data.append('image', image);
+
+                // Send POST request to "/api/pngtojpg" with image as parameter
+                fetch('/api/pngtojpg', {
+                    method: 'POST',
+                    body: data
+                }).then(function (response) {
+                    return response.blob();
+                }).then(function (imageBlob) {
+                    // Open the image in new tab
+                    var url = URL.createObjectURL(imageBlob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted.jpg';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            }
+        </script>
+</body>
+
+</html>
